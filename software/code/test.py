@@ -64,7 +64,8 @@ def main():
                                           resnet_layers=config['resnet_layers'],
                                           swin_transformer_version=config['swin_transformer_version'])
 
-    model.load_state_dict(torch.load(f=model_directory / model_name))
+    model.load_state_dict(torch.load(f=model_directory / model_name,
+                                     map_location=device))
 
     test_set = datasets.ImageFolder(test_directory, transform=preprocess)
     test_dataloader = torch.utils.data.DataLoader(test_set)
