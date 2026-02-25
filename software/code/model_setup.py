@@ -4,19 +4,30 @@ import torch.nn as nn
 from torchvision import models, transforms
 from typing import List, Tuple
 
+import timm
+from timm.data import resolve_data_config
+from timm.data.transforms_factory import create_transform
+
 def setup(model: str,
           pretrained: bool,
           class_names: List[str],
           device: torch.device,
           size: str = 'base',
           resnet_layers: int = 50,
+          resnet_version: int = 1,
           swin_transformer_version: int = 2) -> Tuple[nn.Module, transforms.Compose]:
     
     if model == 'resnet':
-        return setup_resnet(layers=resnet_layers,
-                            pretrained=pretrained,
-                            class_names=class_names,
-                            device=device)
+        if resnet_version == 1:
+            return setup_resnet(layers=resnet_layers,
+                                pretrained=pretrained,
+                                class_names=class_names,
+                                device=device)
+        elif resnet_version == 2:
+            return setup_resnet_v2(layers=resnet_layers,
+                                   pretrained=pretrained,
+                                   class_names=class_names,
+                                   device=device)
     
     if model == 'swin_transformer':
         return setup_swin_transformer(version=swin_transformer_version,
@@ -63,6 +74,37 @@ def setup_resnet(layers: int,
         freeze_parameters(model)
 
     model.fc = nn.Linear(model.fc.in_features, len(class_names)).to(device)
+
+    return model, preprocess
+
+def setup_resnet_v2(layers: int,
+                    pretrained: bool,
+                    class_names: List[str],
+                    device: str) -> Tuple[nn.Module, transforms.Compose]:
+    
+    if layers == 18:
+        model = timm.models.resnetv2.resnetv2_18(pretrained=pretrained)
+
+    elif layers == 34:
+        model = timm.models.resnetv2.resnetv2_34(pretrained=pretrained)
+
+    elif layers == 50:
+        model = timm.models.resnetv2.resnetv2_50(pretrained=pretrained)
+
+    elif layers == 101:
+        model = timm.models.resnetv2.resnetv2_101(pretrained=pretrained)
+
+    elif layers == 152:
+        model = timm.models.resnetv2.resnetv2_152(pretrained=pretrained)
+    
+    preprocess = create_transform(**resolve_data_config(model.pretrained_cfg, model=model))
+
+    if pretrained:
+        freeze_parameters(model)
+
+    model.reset_classifier(num_classes=len(class_names))
+
+    model.to(device)
 
     return model, preprocess
 
