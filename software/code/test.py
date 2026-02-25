@@ -62,6 +62,7 @@ def main():
                                           device=device,
                                           size=config['size'],
                                           resnet_layers=config['resnet_layers'],
+                                          resnet_version=config['resnet_version'],
                                           swin_transformer_version=config['swin_transformer_version'])
 
     model.load_state_dict(torch.load(f=model_directory / model_name,
