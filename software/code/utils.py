@@ -4,6 +4,7 @@ from pathlib import Path
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import configparser
+from torchinfo import summary
 
 def read_config():
     config = configparser.ConfigParser()
@@ -19,6 +20,7 @@ def read_config():
     pretrained = config.getboolean('Model', 'pretrained')
     size = config.get('Model', 'size')
     resnet_layers = config.getint('Model', 'resnet_layers')
+    resnet_version = config.getint('Model', 'resnet_version')
     swin_transformer_version = config.getint('Model', 'swin_transformer_version')
     model_file_name = config.get('Model', 'model_file_name')
 
@@ -36,6 +38,7 @@ def read_config():
         'pretrained': pretrained,
         'size': size,
         'resnet_layers': resnet_layers,
+        'resnet_version': resnet_version,
         'swin_transformer_version': swin_transformer_version,
         'model_file_name': model_file_name,
         'batch_size': batch_size,
@@ -62,3 +65,10 @@ def generate_file_path(model_name: str,
         i += 1
 
     return f'{target_directory}/{file_name}-{i}.{file_extension}'
+
+def create_model_summary(model: nn.Module) -> str:
+    return summary(model=model,
+                   input_size=(32, 3, 224, 224),
+                   col_names=['input_size', 'output_size', 'num_params', 'trainable'],
+                   col_width=20,
+                   row_settings=['var_names'])
