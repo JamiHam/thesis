@@ -1,6 +1,9 @@
+import os
+from pathlib import Path
 import torch
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
+from utils import save_model
 
 def train_step(model: torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
@@ -67,7 +70,9 @@ def train(model: torch.nn.Module,
           loss_function: torch.nn.Module,
           optimizer: torch.optim.Optimizer,
           epochs: int,
-          device: torch.device) -> Dict[str, List]:
+          device: torch.device,
+          model_directory: Path,
+          model_name: str) -> Dict[str, List]:
     
     results = {
         'train_loss': [],
@@ -100,5 +105,10 @@ def train(model: torch.nn.Module,
         results['train_accuracy'].append(train_accuracy)
         results['validation_loss'].append(validation_loss)
         results['validation_accuracy'].append(validation_accuracy)
+
+        save_model(model=model,
+                   model_directory=model_directory,
+                   model_name=model_name,
+                   epoch=epoch + 1)
 
     return results
