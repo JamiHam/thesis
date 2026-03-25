@@ -18,7 +18,7 @@ num_workers = os.cpu_count()
 train_directory = Path(config['train_directory'])
 model_directory = Path(config['model_directory'])
 output_directory = Path(config['output_directory'])
-model_name = config['model_file_name']
+model_name = config['model_name']
 
 def plot_loss_curves(results: Dict[str, List[float]],
                     loss_curve_path: Path):
@@ -34,14 +34,6 @@ def plot_loss_curves(results: Dict[str, List[float]],
     plt.xlabel('Epochs')
     plt.legend()
     plt.savefig(loss_curve_path, bbox_inches='tight', pad_inches=0.1)
-
-def save_model(model: nn.Module,
-               directory: Path,
-               model_name: str):
-    
-    model_path = directory / model_name
-    torch.save(obj=model.state_dict(),
-               f=model_path)
     
 def main():
     class_names = datasets.ImageFolder(train_directory).classes
@@ -78,7 +70,9 @@ def main():
                            loss_function=loss_function,
                            optimizer=optimizer,
                            epochs=config['epochs'],
-                           device=device)
+                           device=device,
+                           model_directory=model_directory,
+                           model_name=model_name)
     
     loss_curve_path = generate_file_path(model_name,
                                          output_directory,
@@ -86,7 +80,6 @@ def main():
                                          directory_name='loss-curve')
 
     plot_loss_curves(results, loss_curve_path)
-    save_model(model, model_directory, model_name)
 
 if __name__ == '__main__':
     main()

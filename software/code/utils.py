@@ -1,6 +1,6 @@
 import os
-import torch
 from pathlib import Path
+import torch
 import torch.nn as nn
 import matplotlib.pyplot as plt
 import configparser
@@ -22,7 +22,8 @@ def read_config():
     resnet_layers = config.getint('Model', 'resnet_layers')
     resnet_version = config.getint('Model', 'resnet_version')
     swin_transformer_version = config.getint('Model', 'swin_transformer_version')
-    model_file_name = config.get('Model', 'model_file_name')
+    model_name = config.get('Model', 'model_name')
+    target_epoch = config.getint('Model', 'target_epoch')
 
     batch_size = config.getint('Training', 'batch_size')
     epochs = config.getint('Training', 'epochs')
@@ -40,7 +41,8 @@ def read_config():
         'resnet_layers': resnet_layers,
         'resnet_version': resnet_version,
         'swin_transformer_version': swin_transformer_version,
-        'model_file_name': model_file_name,
+        'model_name': model_name,
+        'target_epoch': target_epoch,
         'batch_size': batch_size,
         'epochs': epochs,
         'learning_rate': learning_rate
@@ -58,13 +60,27 @@ def generate_file_path(model_name: str,
     if not os.path.exists(target_directory):
         os.makedirs(target_directory)
     
-    file_name = model_name.split('.')[0]
+    #file_name = model_name.split('.')[0]
+    file_name = model_name
     
     i = 0
     while os.path.exists(f'{target_directory}/{file_name}-{i}.{file_extension}'):
         i += 1
 
     return f'{target_directory}/{file_name}-{i}.{file_extension}'
+
+def save_model(model: torch.nn.Module,
+               model_directory: Path,
+               model_name: str,
+               epoch: int):
+    
+    target_directory = f"{model_directory}/{model_name}"
+    if not os.path.exists(target_directory):
+        os.makedirs(target_directory)
+    
+    model_path = f"{target_directory}/{model_name}_epoch{epoch}.pth"
+    torch.save(obj=model.state_dict(),
+               f=model_path)
 
 def create_model_summary(model: nn.Module) -> str:
     return summary(model=model,
