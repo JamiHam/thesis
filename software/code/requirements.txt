@@ -1,0 +1,11 @@
+torch
+torchvision
+matplotlib
+scikit-learn
+tqdm
+configparser
+torchinfo
+grad-cam
+numpy
+opencv-python
+timm
