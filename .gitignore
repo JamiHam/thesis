@@ -3,3 +3,5 @@ software/data
 software/models
 software/outputs
 software/code/__pycache__
+software/code/Dockerfile
+software/code/docker-compose.yml

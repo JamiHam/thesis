@@ -3,7 +3,29 @@ from pathlib import Path
 import torch
 from tqdm.auto import tqdm
 from typing import Dict, List, Tuple
-from utils import save_model
+
+def save_training_results(output_directory: Path,
+                          model_name: str,
+                          results: Dict,
+                          epoch: int):
+    
+    results_string = (
+        f'Epoch: {epoch} | '
+        f'train_loss: {results["train_loss"][-1]:.4f} | '
+        f'train_accuracy: {results["train_accuracy"][-1]:.2f}% | '
+        f'validation_loss: {results["validation_loss"][-1]:.4f} | '
+        f'validation_accuracy: {results["validation_accuracy"][-1]:.2f}%\n'
+    )
+
+    target_directory = output_directory / 'training-results'
+    if not os.path.exists(target_directory):
+        os.makedirs(target_directory)
+
+    file_path = target_directory / model_name
+    with open(file_path, 'a', encoding='utf-8') as file:
+        file.write(results_string)
+
+    return results_string
 
 def train_step(model: torch.nn.Module,
                dataloader: torch.utils.data.DataLoader,
@@ -72,6 +94,7 @@ def train(model: torch.nn.Module,
           epochs: int,
           device: torch.device,
           model_directory: Path,
+          output_directory: Path,
           model_name: str) -> Dict[str, List]:
     
     results = {
@@ -80,6 +103,8 @@ def train(model: torch.nn.Module,
         'validation_loss': [],
         'validation_accuracy': []
     }
+
+    lowest_validation_loss = 1
 
     for epoch in tqdm(range(epochs)):
         train_loss, train_accuracy = train_step(model=model,
@@ -92,23 +117,24 @@ def train(model: torch.nn.Module,
                                                                dataloader=validation_dataloader,
                                                                loss_function=loss_function,
                                                                device=device)
-        
-        print(
-            f'Epoch: {epoch + 1} | '
-            f'train_loss: {train_loss:.4f} | '
-            f'train_accuracy: {train_accuracy:.2f}% | '
-            f'validation_loss: {validation_loss:.4f} | '
-            f'validation_accuracy: {validation_accuracy:.2f}%'
-        )
 
         results['train_loss'].append(train_loss)
         results['train_accuracy'].append(train_accuracy)
         results['validation_loss'].append(validation_loss)
         results['validation_accuracy'].append(validation_accuracy)
 
-        save_model(model=model,
-                   model_directory=model_directory,
-                   model_name=model_name,
-                   epoch=epoch + 1)
+        print(save_training_results(output_directory=output_directory,
+                                    model_name=model_name,
+                                    results=results,
+                                    epoch=epoch + 1))
+        
+        if validation_loss < lowest_validation_loss:
+            print(f'Lowest validation loss so far ({validation_loss:.4f}), saving model...')
+
+            model_path = model_directory / model_name
+            torch.save(obj=model.state_dict(),
+                       f=model_path)
+            
+            lowest_validation_loss = validation_loss
 
     return results

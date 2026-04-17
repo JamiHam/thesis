@@ -11,8 +11,12 @@ import engine
 import model_setup
 from utils import read_config, generate_file_path
 
-config = read_config()
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
+print(f'device: {device}')
+
+print(f'cuda version: {torch.version.cuda}')
+
+config = read_config()
 num_workers = os.cpu_count()
 
 train_directory = Path(config['train_directory'])
@@ -72,6 +76,7 @@ def main():
                            epochs=config['epochs'],
                            device=device,
                            model_directory=model_directory,
+                           output_directory=output_directory,
                            model_name=model_name)
     
     loss_curve_path = generate_file_path(model_name,
