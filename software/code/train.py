@@ -13,16 +13,17 @@ from utils import read_config, generate_file_path
 
 device = 'cuda' if torch.cuda.is_available() else 'cpu'
 print(f'device: {device}')
-
 print(f'cuda version: {torch.version.cuda}')
 
 config = read_config()
-num_workers = os.cpu_count()
 
 train_directory = Path(config['train_directory'])
 model_directory = Path(config['model_directory'])
 output_directory = Path(config['output_directory'])
 model_name = config['model_name']
+
+num_workers = os.cpu_count()
+torch.manual_seed(42)
 
 def plot_loss_curves(results: Dict[str, List[float]],
                     loss_curve_path: Path):
@@ -67,12 +68,16 @@ def main():
 
     loss_function = nn.CrossEntropyLoss()
     optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
+    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
+                                                           mode='min',
+                                                           patience=5)
     
     results = engine.train(model=model,
                            train_dataloader=train_dataloader,
                            validation_dataloader=validation_dataloader,
                            loss_function=loss_function,
                            optimizer=optimizer,
+                           scheduler=scheduler,
                            epochs=config['epochs'],
                            device=device,
                            model_directory=model_directory,

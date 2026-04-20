@@ -7,14 +7,16 @@ from typing import Dict, List, Tuple
 def save_training_results(output_directory: Path,
                           model_name: str,
                           results: Dict,
-                          epoch: int):
+                          epoch: int,
+                          learning_rate: float):
     
     results_string = (
         f'Epoch: {epoch} | '
         f'train_loss: {results["train_loss"][-1]:.4f} | '
         f'train_accuracy: {results["train_accuracy"][-1]:.2f}% | '
         f'validation_loss: {results["validation_loss"][-1]:.4f} | '
-        f'validation_accuracy: {results["validation_accuracy"][-1]:.2f}%\n'
+        f'validation_accuracy: {results["validation_accuracy"][-1]:.2f}% | '
+        f'learning_rate: {learning_rate:.6f}'
     )
 
     target_directory = output_directory / 'training-results'
@@ -24,6 +26,7 @@ def save_training_results(output_directory: Path,
     file_path = target_directory / model_name
     with open(file_path, 'a', encoding='utf-8') as file:
         file.write(results_string)
+        file.write('\n')
 
     return results_string
 
@@ -91,6 +94,7 @@ def train(model: torch.nn.Module,
           validation_dataloader: torch.utils.data.DataLoader,
           loss_function: torch.nn.Module,
           optimizer: torch.optim.Optimizer,
+          scheduler: torch.optim.lr_scheduler,
           epochs: int,
           device: torch.device,
           model_directory: Path,
@@ -117,6 +121,8 @@ def train(model: torch.nn.Module,
                                                                dataloader=validation_dataloader,
                                                                loss_function=loss_function,
                                                                device=device)
+        
+        scheduler.step(validation_loss)
 
         results['train_loss'].append(train_loss)
         results['train_accuracy'].append(train_accuracy)
@@ -126,7 +132,8 @@ def train(model: torch.nn.Module,
         print(save_training_results(output_directory=output_directory,
                                     model_name=model_name,
                                     results=results,
-                                    epoch=epoch + 1))
+                                    epoch=epoch + 1,
+                                    learning_rate=optimizer.param_groups[0]['lr']))
         
         if validation_loss < lowest_validation_loss:
             print(f'Lowest validation loss so far ({validation_loss:.4f}), saving model...')
