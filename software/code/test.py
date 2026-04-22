@@ -14,7 +14,6 @@ test_directory = Path(config['test_directory'])
 model_directory = Path(config['model_directory'])
 output_directory = Path(config['output_directory'])
 model_name = config['model_name']
-target_epoch = config['target_epoch']
 
 def calculate_metrics(true_labels: List,
                       predicted_labels: List,
@@ -66,7 +65,7 @@ def main():
                                           resnet_version=config['resnet_version'],
                                           swin_transformer_version=config['swin_transformer_version'])
 
-    model_path = f"{model_directory}/{model_name}/{model_name}_epoch{target_epoch}.pth"
+    model_path = f'{model_directory}/{model_name}.pth'
     model.load_state_dict(torch.load(f=model_path,
                                      map_location=device))
 

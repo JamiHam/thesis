@@ -27,6 +27,7 @@ def read_config():
     batch_size = config.getint('Training', 'batch_size')
     epochs = config.getint('Training', 'epochs')
     learning_rate = config.getfloat('Training', 'learning_rate')
+    patience = config.getint('Training', 'patience')
 
     config_values = {
         'train_directory': train_directory,
@@ -43,7 +44,8 @@ def read_config():
         'model_name': model_name,
         'batch_size': batch_size,
         'epochs': epochs,
-        'learning_rate': learning_rate
+        'learning_rate': learning_rate,
+        'patience': patience
     }
 
     return config_values

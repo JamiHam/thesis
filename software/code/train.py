@@ -70,7 +70,7 @@ def main():
     optimizer = torch.optim.Adam(model.parameters(), lr=config['learning_rate'])
     scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer=optimizer,
                                                            mode='min',
-                                                           patience=5)
+                                                           patience=config['patience'])
     
     results = engine.train(model=model,
                            train_dataloader=train_dataloader,

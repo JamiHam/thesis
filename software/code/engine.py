@@ -138,7 +138,7 @@ def train(model: torch.nn.Module,
         if validation_loss < lowest_validation_loss:
             print(f'Lowest validation loss so far ({validation_loss:.4f}), saving model...')
 
-            model_path = model_directory / model_name
+            model_path = f'{model_directory}/{model_name}.pth'
             torch.save(obj=model.state_dict(),
                        f=model_path)
             
