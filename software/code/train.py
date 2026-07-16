@@ -21,9 +21,12 @@ train_directory = Path(config['train_directory'])
 model_directory = Path(config['model_directory'])
 output_directory = Path(config['output_directory'])
 model_name = config['model_name']
+random_seed = config['random_seed']
 
 num_workers = os.cpu_count()
-torch.manual_seed(42)
+
+if random_seed != 0:
+    torch.manual_seed(random_seed)
 
 def plot_loss_curves(results: Dict[str, List[float]],
                     loss_curve_path: Path):
@@ -82,7 +85,8 @@ def main():
                            device=device,
                            model_directory=model_directory,
                            output_directory=output_directory,
-                           model_name=model_name)
+                           model_name=model_name,
+                           minimum_epochs=config['minimum_epochs'])
     
     loss_curve_path = generate_file_path(model_name,
                                          output_directory,
