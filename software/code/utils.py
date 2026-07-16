@@ -24,10 +24,12 @@ def read_config():
     swin_transformer_version = config.getint('Model', 'swin_transformer_version')
     model_name = config.get('Model', 'model_name')
 
+    random_seed = config.getint('Training', 'random_seed')
     batch_size = config.getint('Training', 'batch_size')
     epochs = config.getint('Training', 'epochs')
     learning_rate = config.getfloat('Training', 'learning_rate')
     patience = config.getint('Training', 'patience')
+    minimum_epochs = config.getint('Training', 'minimum_epochs')
 
     config_values = {
         'train_directory': train_directory,
@@ -42,10 +44,12 @@ def read_config():
         'resnet_version': resnet_version,
         'swin_transformer_version': swin_transformer_version,
         'model_name': model_name,
+        'random_seed': random_seed,
         'batch_size': batch_size,
         'epochs': epochs,
         'learning_rate': learning_rate,
-        'patience': patience
+        'patience': patience,
+        'minimum_epochs': minimum_epochs
     }
 
     return config_values
@@ -67,6 +71,18 @@ def generate_file_path(model_name: str,
         i += 1
 
     return f'{target_directory}/{file_name}-{i}.{file_extension}'
+
+def save_to_file(directory: Path,
+                 file_name: str,
+                 content: str):
+    
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+
+    file_path = directory / file_name
+    with open(file_path, 'a', encoding='utf-8') as file:
+        file.write(content)
+        file.write('\n')
 
 def create_model_summary(model: nn.Module) -> str:
     return summary(model=model,
