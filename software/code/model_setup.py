@@ -180,7 +180,7 @@ def setup_convnext(size: str,
     if pretrained:
         freeze_parameters(model)
 
-    lastconv_output_channels = 1024
+    lastconv_output_channels = model.classifier[-1].in_features
     norm_layer = partial(models.convnext.LayerNorm2d, eps=1e-6)
 
     model.classifier = nn.Sequential(
